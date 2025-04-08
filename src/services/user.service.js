@@ -6,10 +6,10 @@ const jwtUtils = require('../utils/jwt.utils');
 
 class UserService {
     constructor() {
-        this.cartManager = new CartManager(); // <== ¡ESTE es el que faltaba!
-        this.userManager = new UserManager(); // no necesita parámetros ahora
+        this.cartManager = new CartManager(); 
+        this.userManager = new UserManager(); 
     }
-    
+
     async registerUser(userData) {
         const { email, password } = userData;
 
