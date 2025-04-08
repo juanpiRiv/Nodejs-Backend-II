@@ -6,6 +6,20 @@ const { isAuthenticated } = require('../middlewares/auth.middleware.js');
 
 // Registro de usuario
 router.post('/register', async (req, res) => {
+    const { first_name, last_name, email, password } = req.body;
+
+    if (!first_name || !last_name || !email || !password) {
+        return res.status(400).json({ status: 'error', message: 'Todos los campos son obligatorios' });
+    }
+
+    if (!email.includes('@')) {
+        return res.status(400).json({ status: 'error', message: 'El email no es válido' });
+    }
+
+    if (password.length < 6) {
+        return res.status(400).json({ status: 'error', message: 'La contraseña debe tener al menos 6 caracteres' });
+    }
+
     try {
         const result = await userService.registerUser(req.body);
         res.status(201).json({ status: 'success', message: 'Usuario registrado correctamente', payload: result.user });

@@ -1,53 +1,47 @@
-# Proyecto de Autenticación y Login
+# Proyecto E-commerce - Sistema de Autenticación
 
-Este proyecto es una aplicación web que implementa un sistema de autenticación y login.
+## Descripción
 
-## Características
+Este proyecto es un sistema de autenticación para un sitio web de comercio electrónico. Incluye la gestión de usuarios, la autenticación mediante JWT y la protección de rutas.
 
-*   Autenticación de usuarios.
-*   Registro de usuarios.
-*   Manejo de sesiones.
-*   Uso de JWT (JSON Web Tokens).
-*   Conexión a base de datos.
+## Requisitos Previos
 
-## Tecnologías Utilizadas
+- Node.js y npm instalados en tu sistema.
+- MongoDB instalado y en ejecución.
 
-*   Node.js
-*   Express.js
-*   MongoDB
-*   Passport.js
-*   JWT
+## Variables de entorno requeridas
 
-## Estructura del Proyecto
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+PORT=8080
+MONGO_URI=mongodb://localhost:27017/ecommerce
+JWT_SECRET=tu_clave_secreta_jwt
+JWT_COOKIE_NAME=authToken
 
-*   `src/`: Código fuente de la aplicación.
-    *   `app.js`: Archivo principal de la aplicación.
-    *   `config/`: Configuración de la aplicación (base de datos, passport, etc.).
-    *   `dao/`: Capa de acceso a datos (Data Access Object).
-        *   `models/`: Modelos de datos (User, Cart).
-        *   `managers/`: Manejadores de datos (userManager, cartManager).
-    *   `middlewares/`: Middlewares de la aplicación (auth.middleware).
-    *   `routes/`: Rutas de la aplicación (user.routes, session.routes).
-    *   `services/`: Servicios de la aplicación (user.service).
-    *   `utils/`: Utilidades (jwt.utils).
-*   `.env`: Variables de entorno.
-*   `.gitignore`: Archivos ignorados por Git.
-*   `package.json`: Dependencias del proyecto.
-*   `package-lock.json`: Versiones de las dependencias.
+**Importante:** Asegúrate de reemplazar `tu_clave_secreta_jwt` con una clave secreta segura.
 
 ## Instalación
 
-1.  Clonar el repositorio.
-2.  Ejecutar `npm install` para instalar las dependencias.
-3.  Configurar las variables de entorno en el archivo `.env`.
-4.  Ejecutar `npm start` para iniciar la aplicación.
+```bash
+npm install
+```
 
-## Uso
+## Ejecución
 
-*   Registrarse en la aplicación.
-*   Iniciar sesión con las credenciales.
-*   Acceder a las funcionalidades protegidas.
+```bash
+npm start
+```
 
-## Autor
+## Para desarrollo:
 
-Juan Pablo
+```bash
+npm run dev
+```
+
+## Dependencias
+
+Este proyecto utiliza las siguientes dependencias:
+
+- express
+- mongoose
+- jsonwebtoken
+- bcrypt

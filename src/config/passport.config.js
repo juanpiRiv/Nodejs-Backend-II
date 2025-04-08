@@ -41,25 +41,7 @@ const initializePassport = () => {
             }
         }
     ));
-
-    // Estrategia JWT para validar token
-    passport.use('jwt', new JwtStrategy(
-        {
-            jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
-            secretOrKey: process.env.JWT_SECRET
-        },
-        async (jwt_payload, done) => {
-            try {
-                const user = await userManager.getUserById(jwt_payload.sub);
-                if (!user) {
-                    return done(null, false);
-                }
-                return done(null, user);
-            } catch (error) {
-                return done(error);
-            }
-        }
-    ));
+};
 
     // Estrategia current para extraer usuario del token
     passport.use('current', new JwtStrategy(
@@ -80,19 +62,22 @@ const initializePassport = () => {
         }
     ));
 
+/*
+comentamos ya que nose usan sesiones
     // Serializar y deserializar usuario para sesiones
-    passport.serializeUser((user, done) => {
-        done(null, user._id);
-    });
+    // passport.serializeUser((user, done) => {
+    //     done(null, user._id);
+    // });
 
-    passport.deserializeUser(async (id, done) => {
-        try {
-            const user = await userManager.getUserById(id);
-            done(null, user);
-        } catch (error) {
-            done(error);
-        }
-    });
-};
+    // passport.deserializeUser(async (id, done) => {
+    //     try {
+    //         const user = await userManager.getUserById(id);
+    //         done(null, user);
+    //     } catch (error) {
+    //         done(error);
+    //     }
+    // });
+*/
+
 
 module.exports = initializePassport;
