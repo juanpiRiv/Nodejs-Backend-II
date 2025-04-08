@@ -4,6 +4,7 @@ const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const User = require('../dao/models/user.model');
 const UserManager = require('../dao/managers/userManager');
+const bcrypt = require('bcrypt');
 
 const userManager = new UserManager();
 
@@ -17,7 +18,6 @@ const cookieExtractor = (req) => {
 };
 
 const initializePassport = () => {
-    // Estrategia local para login
     passport.use('login', new LocalStrategy(
         {
             usernameField: 'email',
@@ -31,7 +31,9 @@ const initializePassport = () => {
                     return done(null, false, { message: 'Usuario no encontrado' });
                 }
 
-                if (!user.isValidPassword(password)) {
+                const isMatch = bcrypt.compareSync(password, user.password); // validación directa
+
+                if (!isMatch) {
                     return done(null, false, { message: 'Contraseña incorrecta' });
                 }
 
@@ -41,7 +43,37 @@ const initializePassport = () => {
             }
         }
     ));
-};
+
+
+
+    // Estrategia local para register
+    passport.use('register', new LocalStrategy(
+        {
+            usernameField: 'email',
+            passwordField: 'password',
+            passReqToCallback: true
+        },
+        async (req, email, password, done) => {
+            try {
+                const existingUser = await userManager.getUserByEmail(email);
+                if (existingUser) {
+                    return done(null, false, { message: 'El usuario ya existe' });
+                }
+    
+                const cart = await userManager.cartManager.createCart();
+    
+                const newUser = await userManager.createUser({
+                    ...req.body,
+                    cart: cart._id
+                });
+    
+                return done(null, newUser);
+            } catch (error) {
+                return done(error);
+            }
+        }
+    ));
+    
 
     // Estrategia current para extraer usuario del token
     passport.use('current', new JwtStrategy(
@@ -61,6 +93,7 @@ const initializePassport = () => {
             }
         }
     ));
+};
 
 /*
 comentamos ya que nose usan sesiones
