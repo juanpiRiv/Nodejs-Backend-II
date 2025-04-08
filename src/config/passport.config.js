@@ -5,6 +5,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const User = require('../dao/models/user.model');
 const UserManager = require('../dao/managers/userManager');
 const bcrypt = require('bcrypt');
+const userService = require('../services/user.service');
 
 const userManager = new UserManager();
 
@@ -55,25 +56,18 @@ const initializePassport = () => {
         },
         async (req, email, password, done) => {
             try {
-                const existingUser = await userManager.getUserByEmail(email);
-                if (existingUser) {
-                    return done(null, false, { message: 'El usuario ya existe' });
-                }
-    
-                const cart = await userManager.cartManager.createCart();
-    
-                const newUser = await userManager.createUser({
-                    ...req.body,
-                    cart: cart._id
-                });
-    
-                return done(null, newUser);
+                const newUserData = {
+                    ...req.body
+                };
+
+                const { user } = await userService.registerUser(newUserData); // ✅ todo lo hace el service
+                return done(null, user);
             } catch (error) {
                 return done(error);
             }
         }
     ));
-    
+
 
     // Estrategia current para extraer usuario del token
     passport.use('current', new JwtStrategy(

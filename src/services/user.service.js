@@ -1,75 +1,81 @@
+const bcrypt = require('bcrypt');
 const UserManager = require('../dao/managers/userManager');
+const CartManager = require('../dao/managers/cartManager');
 const jwtUtils = require('../utils/jwt.utils');
+
 
 class UserService {
     constructor() {
-        this.userManager = new UserManager();
+        this.cartManager = new CartManager(); // <== ¡ESTE es el que faltaba!
+        this.userManager = new UserManager(); // no necesita parámetros ahora
     }
-
+    
     async registerUser(userData) {
-        try {
-            const newUser = await this.userManager.createUser(userData);
-            const userDTO = this.getUserDTO(newUser);
-            return { user: userDTO };
-        } catch (error) {
-            throw error;
+        const { email, password } = userData;
+
+        const existingUser = await this.userManager.getUserByEmail(email);
+        if (existingUser) {
+            throw new Error('Ya existe un usuario con ese email');
         }
+
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        const cart = await this.cartManager.createCart();
+
+        const newUser = await this.userManager.createUser({
+            ...userData,
+            password: hashedPassword,
+            cart: cart._id
+        });
+
+        return { user: this.getUserDTO(newUser) };
     }
 
     async loginUser(email, password) {
-        try {
-            const user = await this.userManager.getUserByEmail(email);
+        const user = await this.userManager.getUserByEmail(email);
 
-            if (!user || !user.isValidPassword(password)) {
-                throw new Error('Credenciales inválidas');
-            }
-
-            const token = jwtUtils.generateToken(user);
-            return { token, user: this.getUserDTO(user) };
-        } catch (error) {
-            throw error;
+        if (!user) {
+            throw new Error('Usuario no encontrado');
         }
+
+        const isMatch = bcrypt.compareSync(password, user.password);
+        if (!isMatch) {
+            throw new Error('Contraseña incorrecta');
+        }
+
+        const token = jwtUtils.generateToken(user);
+        return { token, user: this.getUserDTO(user) };
     }
 
     async getCurrentUser(userId) {
-        try {
-            const user = await this.userManager.getUserById(userId);
-            if (!user) {
-                throw new Error('Usuario no encontrado');
-            }
-            return this.getUserDTO(user);
-        } catch (error) {
-            throw error;
+        const user = await this.userManager.getUserById(userId);
+        if (!user) {
+            throw new Error('Usuario no encontrado');
         }
+        return this.getUserDTO(user);
     }
 
     async updateUser(userId, userData) {
-        try {
-            const updatedUser = await this.userManager.updateUser(userId, userData);
-            return this.getUserDTO(updatedUser);
-        } catch (error) {
-            throw error;
+        if (userData.password) {
+            userData.password = bcrypt.hashSync(userData.password, 10);
         }
+
+        const updatedUser = await this.userManager.updateUser(userId, userData);
+        return this.getUserDTO(updatedUser);
     }
 
     async deleteUser(userId) {
-        try {
-            return await this.userManager.deleteUser(userId);
-        } catch (error) {
-            throw error;
-        }
+        return await this.userManager.deleteUser(userId);
     }
 
     async getAllUsers() {
-        try {
-            const users = await this.userManager.getAllUsers();
-            return users.map(user => this.getUserDTO(user));
-        } catch (error) {
-            throw error;
-        }
+        const users = await this.userManager.getAllUsers();
+        return users.map(user => this.getUserDTO(user));
     }
 
-    // DTO para no exponer información sensible como la contraseña
+    generateToken(user) {
+        return jwtUtils.generateToken(user);
+    }
+
     getUserDTO(user) {
         return {
             id: user._id,
